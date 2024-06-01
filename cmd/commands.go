@@ -318,6 +318,9 @@ var (
 		&ConfigCommand,
 		&selfCommand,
 
+		// UI
+		&uiCommand,
+
 		// Version
 		&UpdateCommand,
 
