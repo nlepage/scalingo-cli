@@ -3,6 +3,7 @@ package ui
 import (
 	"context"
 	"log"
+	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"gopkg.in/errgo.v1"
@@ -38,7 +39,7 @@ func (m *model) Init() tea.Cmd {
 	return tea.Batch(
 		tea.SetWindowTitle("Scalingo"),
 		tea.Sequence(
-			fetchRegions(m.context, m.client),
+			fetchRegions(m.context),
 		),
 	)
 }
@@ -69,14 +70,16 @@ func (m *model) View() string {
 	return s
 }
 
-func fetchRegions(ctx context.Context, c *scalingo.Client) tea.Cmd {
+func fetchRegions(ctx context.Context) tea.Cmd {
 	return func() tea.Msg {
-		regions, err := c.RegionsList(ctx)
+		regionCache, err := config.EnsureRegionsCache(ctx, config.C, config.GetRegionOpts{
+			Token: os.Getenv("SCALINGO_API_TOKEN"),
+		})
 		if err != nil {
 			// FIXME how to manage errors?
-			log.Fatal("fail to list regions")
+			log.Fatal("fail to read regions cache")
 		}
 
-		return regions
+		return regionCache.Regions
 	}
 }
